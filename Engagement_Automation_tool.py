@@ -1,21 +1,15 @@
-
-
 import streamlit as st
 st.set_page_config(page_title="ESG Extractor", layout="centered")
-import tkinter as tk
-from tkinter import filedialog
 import os
 import re
 import fitz  # PyMuPDF
-import csv
 from datetime import datetime
 import sys
 import math
 import pandas as pd
-from tkinter import messagebox
 from io import BytesIO
 
-# --- Secure login credentials (you can expand this dict) ---
+
 CREDENTIALS = {
     "admin": "1234",
     "esg_user": "esgpass",
@@ -395,7 +389,7 @@ def process_pdf_folder(input_folder, output_folder, legend_rect, color_map, log_
     pdf_files = [f for f in os.listdir(input_folder) if f.lower().endswith('.pdf')]
     if not pdf_files:
         #messagebox.showinfo("Error: No PDF documents found.")
-        messagebox.showerror("No PDF documents found.", "Error: No PDF documents found.")
+        st.error("No PDF documents found.", "Error: No PDF documents found.")
         print("No PDF documents found.", "Error: No PDF documents found.")
         log_message("Error: No PDF documents found.", log_file)
         sys.exit()
@@ -410,31 +404,13 @@ def process_pdf_folder(input_folder, output_folder, legend_rect, color_map, log_
             final_df = pd.concat([final_df,success])
     return final_df       
 
-def select_input_folder():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askdirectory(title="Select Folder Containing PDFs")
-
-def is_valid_path(path):
-    return bool(path.strip()) and os.path.exists(path)
-
-def show_processing_window():
-    gui = tk.Tk()
-    gui.title("PDF Extraction")
-    gui.geometry("300x100")
-    gui.attributes('-topmost', True)
-    tk.Label(gui, text="Processing PDFs...\nThis window will close when done.",
-             font=("Arial", 10), justify="center").pack(expand=True)
-    return gui
-
-
 
 st.title("📄 PDF Data Extractor")
 
 uploaded_files = st.file_uploader("Upload PDF files", type="pdf", accept_multiple_files=True)
 
 if uploaded_files:
-    st.info("Processing PDFs...")
+    st.info("🔄 Processing PDFs...")
 
     all_data = []
     logs = []
@@ -462,12 +438,10 @@ if uploaded_files:
         except Exception as e:
             logs.append(f"{filename}: FAILURE - {str(e)}")
 
-    # Display logs
     st.subheader("🔍 Extraction Log")
     for log in logs:
         st.write(log)
 
-    # Display and download data
     if all_data:
         df = pd.DataFrame(all_data)
         st.subheader("📊 Extracted Data")
@@ -476,12 +450,14 @@ if uploaded_files:
         output = BytesIO()
         df.to_excel(output, index=False, engine='xlsxwriter')
         output.seek(0)
-        st.download_button(label="📥 Download Combined Excel",data=output,file_name=f"ESG_Extracted_{now}.xlsx",mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+
+        st.download_button(
+            label="📥 Download Combined Excel",
+            data=output,
+            file_name=f"ESG_Extracted_{now}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
     else:
-        st.error("No data extracted from any PDFs.")
-
-
-
-
-
+        st.error("❌ No data extracted from any PDFs.")
+else:
+    st.warning("⚠️ Please upload one or more PDF files to begin.")
