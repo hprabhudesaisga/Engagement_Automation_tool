@@ -1,0 +1,9 @@
+streamlit
+pymupdf
+pandas
+os
+re
+fitz
+datetime
+sys
+math
