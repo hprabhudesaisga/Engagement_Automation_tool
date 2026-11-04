@@ -10,11 +10,7 @@ import pandas as pd
 from io import BytesIO
 
 
-CREDENTIALS = {
-    "admin": "1234",
-    "esg_user": "esgpass",
-}
-
+CREDENTIALS = st.secrets["credentials"]
 
 
 # --- Login logic ---
